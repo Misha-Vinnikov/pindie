@@ -16,12 +16,13 @@ export const isResponseOk = (response) => {
 };
 
 const normalizeDataObject = (obj) => {
-  return {
-    ...obj,
-    category: obj.categories,
-    users: obj.users_permissions_users,
-  };
-};
+  let str = JSON.stringify(obj)
+  
+  str = str.replaceAll('_id', 'id');
+  const newObj = JSON.parse(str)
+  const result = { ...newObj, category: newObj.categories }
+  return result;
+}
 
 export const normalizeData = (data) => {
   return data.map((item) => {
@@ -80,15 +81,23 @@ export const getMe = async (url, jwt) => {
     return error;
   }
 };
-export const setJWT = (jwt)=>{
-  localStorage.setItem("jwt", jwt)
-};
+export const setJWT = (jwt) => {
+  document.cookie = `jwt=${jwt}`
+  localStorage.setItem('jwt', jwt)
+}
+
 export const getJWT = () => {
-  return localStorage.getItem("jwt");
-};
+  if (document.cookie === '') {
+    return localStorage.getItem('jwt')
+  }
+  const jwt = document.cookie.split(';').find((item) => item.includes('jwt'))
+  return jwt ? jwt.split('=')[1] : null
+}
+
 export const removeJWT = () => {
-  localStorage.removeItem("jwt")
-};
+  document.cookie = 'jwt=;'
+  localStorage.removeItem('jwt')
+}
 
 export const vote = async (url, jwt, usersArray) => {
   try {
@@ -98,7 +107,7 @@ export const vote = async (url, jwt, usersArray) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${jwt}` ,
       },
-      body: JSON.stringify({ users_permissions_users: usersArray }),
+      body: JSON.stringify({ users: usersArray })
       });
     if (response.status !== 200) {
       throw new Error("Ошибка получения данных");

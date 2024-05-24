@@ -6,7 +6,7 @@ import { useStore } from "@/app/store/app-store";
 import { useState, useEffect } from "react";
 
 export const AuthForm = (props) => {
-  const [authData, setAuthData] = useState({ identifier: "", password: "" });
+  const [authData, setAuthData] = useState({ email: "", password: "" });
   const [message, setMessage] = useState({ status: null, text: null });
  const store = useStore();
 
@@ -17,7 +17,7 @@ export const AuthForm = (props) => {
     e.preventDefault();
     const userData = await authorize(endpoints.auth, authData);
     if (isResponseOk(userData)) {
-      store.login(userData.data,userData.jwt);
+      store.login({...userData, id: userData._id}, userData.jwt); 
       setMessage({ status: "success", text: "Вы успешно авторизовались!" });
     } else {
       setMessage({ status: "error", text: "Неверные почта или пароль" });
@@ -39,7 +39,7 @@ export const AuthForm = (props) => {
         <label className={Styles["form__field"]}>
           <span className={Styles["form__field-title"]}>Email</span>
           <input
-            name="identifier"
+            name="email"
             onInput={handleInput}
             className={Styles["form__field-input"]}
             type="email"
